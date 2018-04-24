@@ -16,7 +16,7 @@ app.get('/', function(request, response) {
 
 app.post('/', function (req, res) {
     console.log(req.body)
-    res.send('THIS IS THE SIMULATED RESPONSE FROM SWITCH')
+    res.send({status: '200'})
 })
 
 app.listen(app.get('port'), function() {
