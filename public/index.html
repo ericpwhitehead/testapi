@@ -1,1 +1,91 @@
-<h2>Welcome</h2>
+<style>
+.selectDate {
+    background: yellow;
+}
+</style>
+<div class="results"></div>
+<hr/>
+<h3>Versions</h3>
+<div class="versions"></div>
+<button class="compare" style="display: none;">Compare two dates</button>
+<hr/>
+
+<div class="res">
+    <div class="one" style="float: left; width: 49%;"></div>
+    <div class="two" style="float: left; width: 49%;"></div>
+</div>
+<hr/>
+<h2>Full Record</h2>
+<table class="newest" border="1" cellpadding="0" cellspacing="0">
+    <tbody>
+
+    </tbody>
+</table>
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.11/lodash.min.js"></script>
+<script>
+$.getJSON('/allData', function(data) {
+    console.log(data[0]);
+    $('.results').html(`
+        <strong>Title: </strong> ${data[0].data.briefTitle}<br/>
+        <strong>ID: </strong> ${data[0].nct}<br/>
+        <strong>Date/Time Extracted: </strong> ${data[0].timestamp}<br/>
+        <strong>Unique Hash: </strong> ${data[0].hash}<br/>
+    `)
+    for (var key in data[0].data){
+        $('.newest tbody').append(`
+            <tr>
+                <td>${key}</td>
+                <td>${(data[0].data)[key]}</td>
+            </tr>
+        `)
+    }
+    (data[0].history).forEach(version => {
+        var date = (version.date).split('(')[0].trim();
+        $('.versions').append(`<span style="cursor: pointer;">${date}</span>`)
+    })
+
+    $('.versions span').click(function() {
+        $(this).toggleClass('selectDate');
+        if ($('.versions .selectDate').length === 2) {
+            console.log('two selected');
+            $('button.compare').show();
+        } else{
+            $('button.compare').hide();
+        }
+    })
+
+    $('button.compare').click(function() {
+        var date1 = $('.versions').children('.selectDate:first').text().trim();
+        var date2 = $('.versions').children('.selectDate:last').text().trim();
+        console.log(date1, date2)
+        $('.one').html(`<h3>${date1}</h3>`);
+        $('.two').html(`<h3>${date2}</h3>`);
+        oneIndex = (data[0].history).findIndex((obj => obj.date == date1));
+        twoIndex = (data[0].history).findIndex((obj => obj.date == date2));
+        console.log(oneIndex, twoIndex);
+        // $('.one').append(JSON.stringify((data[0].history)[oneIndex]))
+        // $('.two').append((data[0].history)[twoIndex])
+        var a = (data[0].history)[oneIndex];
+        var b = (data[0].history)[twoIndex]
+        var diffs = difference(a,b);
+        for (var key in diffs){
+            console.log(key);
+            $('.one').append(`<br/><strong>${key}</strong>: ${a[key]}`);
+            $('.two').append(`<br/><strong>${key}</strong>: ${b[key]}`)
+        }
+    })
+
+})
+
+function difference(object, base) {
+	function changes(object, base) {
+		return _.transform(object, function(result, value, key) {
+			if (!_.isEqual(value, base[key])) {
+				result[key] = (_.isObject(value) && _.isObject(base[key])) ? changes(value, base[key]) : value;
+			}
+		});
+	}
+	return changes(object, base);
+}
+</script>
