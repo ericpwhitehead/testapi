@@ -271,6 +271,7 @@ $.getJSON('/unique', function(data) {
     } );
 
     $('#example tbody tr').click(function() {
+        $('.comparison tbody').html('');
         $('#example tbody tr').removeClass('showMore');
         $(this).toggleClass('showMore');
         var title = $(this).children('td.title').text().trim();
@@ -311,6 +312,18 @@ $.getJSON('/unique', function(data) {
                 } else{
                     $('button.viewOne').hide();
                     $('button.compareTwo').hide();
+                }
+            })
+
+            $('button.viewOne').click(function() {
+                
+                var date1 = $('.selectDate:first').text().trim();
+                oneIndex = (nctData).findIndex((obj => obj.date == date1));
+                
+                for (var key in nctData[oneIndex]){
+                    $('.comparison').append(`
+                        <p><strong>${key}</strong>: ${nctData[oneIndex][key]}</p>
+                    `)
                 }
             })
 
